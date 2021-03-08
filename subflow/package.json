@@ -1,0 +1,16 @@
+{
+    "name": "node-red-contrib-sf00",
+    "version": "1.0.0",
+    "description": "",
+    "keywords": [
+        "Node-RED, subflow"
+    ],
+    "license": "Apache-2.0",
+    "node-red": {
+        "nodes": {
+            "subflow-node": "subflow.js"
+        },
+        "dependencies": []
+    },
+    "dependencies": {}
+}

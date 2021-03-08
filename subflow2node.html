@@ -1,0 +1,75 @@
+<!--
+  Copyright JS Foundation and other contributors, http://js.foundation
+
+  Licensed under the Apache License, Version 2.0 (the "License");
+  you may not use this file except in compliance with the License.
+  You may obtain a copy of the License at
+
+  http://www.apache.org/licenses/LICENSE-2.0
+
+  Unless required by applicable law or agreed to in writing, software
+  distributed under the License is distributed on an "AS IS" BASIS,
+  WITH出力 WARRANTIES OR CONDITIONS OF ANY K入力D, either express or implied.
+  See the License for the specific language governing permissions and
+  limitations under the License.
+-->
+
+<script type="text/html" data-template-name="sf to node">
+    <div class="form-row">
+        <label for="node-input-name">Name</label>
+        <input type="text" id="node-input-name"/>
+    </div>
+    <div class="form-row" style="margin-left: 40px; width: 100%;">
+        <input type="checkbox" id="node-input-base64" style="width: auto; vertical-align: top; display: inline-block">
+        <label for="node-input-base64" style="width: 70%;">Output base64 encoded NPM package</label>
+    </div>
+    <div class="form-row" style="margin-left: 40px; width: 100%;">
+        <input type="checkbox" id="node-input-encrypt" style="width: auto; vertical-align: top; display: inline-block">
+        <label for="node-input-encrypt" style="width: 70%;">Encrypt SUBFLOW</label>
+    </div>
+    <div class="form-row" id="encrypt-div">
+        <label>Encryption Key</label>
+        <input type="password" id="node-input-encryptionKey">
+    </div>
+</script>
+
+<script type="text/javascript">
+(function () {
+    
+    RED.nodes.registerType('sf to node',{
+        category: 'function',
+        color:"#F3B567",
+        defaults: {
+            name: { value: "" },
+            base64: { value: true },
+            encrypt: { value: false },
+        },
+        credentials: {
+            encryptionKey: { type: "password" },
+        },
+        inputs:1,
+        outputs:1,
+        icon: "font-awesome/fa-cog",
+        label: function() {
+            return this.name || "SF to node";
+        },
+        labelStyle: function() {
+            return this.name ? "node_label_italic" : "";
+        },
+        oneditprepare: function() {
+            $("#node-input-encrypt").change(function (ev) {
+                if ($("#node-input-encrypt").prop("checked")) {
+                    $("#encrypt-div").show();
+                }
+                else {
+                    $("#encrypt-div").hide();
+                }
+            });
+        },
+        oneditsave: function() {
+        },
+        oneditresize: function(size) {
+        }
+    });
+})();
+</script>
