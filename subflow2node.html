@@ -23,29 +23,44 @@
         <input type="checkbox" id="node-input-base64" style="width: auto; vertical-align: top; display: inline-block">
         <label for="node-input-base64" style="width: 70%;">Output base64 encoded NPM package</label>
     </div>
-    <div class="form-row" style="margin-left: 40px; width: 100%;">
-        <input type="checkbox" id="node-input-encrypt" style="width: auto; vertical-align: top; display: inline-block">
-        <label for="node-input-encrypt" style="width: 70%;">Encrypt SUBFLOW</label>
+    <div class="form-row">
+        <label>Encoding</label>
+        <select id="node-input-encoding">
+        </select>
     </div>
-    <div class="form-row" id="encrypt-div">
-        <label>Encryption Key</label>
-        <input type="password" id="node-input-encryptionKey">
+    <div class="form-row" id="encode-div">
+        <label>Encode Key</label>
+        <input type="password" id="node-input-encodeKey">
     </div>
 </script>
 
 <script type="text/javascript">
 (function () {
-    
+    var encodings = null;
+
+    function getEncodings(node) {
+        if (encodings) {
+            return Promise.resolve(encodings);
+        }
+        var root = RED.settings.apiRootUrl || "";
+        var promise = $.ajax({
+            url: root +"/subflow2node/encodings",
+            type: "GET",
+            cache: false
+        });
+        return promise;
+    }
+
     RED.nodes.registerType('sf to node',{
         category: 'function',
         color:"#F3B567",
         defaults: {
             name: { value: "" },
             base64: { value: true },
-            encrypt: { value: false },
+            encoding: { value: "none" },
         },
         credentials: {
-            encryptionKey: { type: "password" },
+            encodeKey: { type: "password" },
         },
         inputs:1,
         outputs:1,
@@ -57,13 +72,26 @@
             return this.name ? "node_label_italic" : "";
         },
         oneditprepare: function() {
-            $("#node-input-encrypt").change(function (ev) {
-                if ($("#node-input-encrypt").prop("checked")) {
-                    $("#encrypt-div").show();
-                }
-                else {
-                    $("#encrypt-div").hide();
-                }
+            var node = this;
+            var menu = $("#node-input-encoding");
+            getEncodings().then((encodings) => {
+                var encodings = [ "none", "AES" ].concat(encodings);
+                encodings.forEach((enc) => {
+                    $("<option/>", {
+                        value: enc
+                    }).text(enc).appendTo(menu);
+                });
+                menu.change(function (ev) {
+                    var enc = $("#node-input-encoding").val();
+                    if (enc !== "none") {
+                        $("#encode-div").show();
+                    }
+                    else {
+                        $("#encode-div").hide();
+                    }
+                });
+                menu.val(node.encoding);
+                menu.change();
             });
         },
         oneditsave: function() {

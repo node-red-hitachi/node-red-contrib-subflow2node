@@ -18,6 +18,7 @@ module.exports = function(RED) {
     "use strict";
 
     const fs = require("fs");
+    const os = require("os");
     const path = require("path");
     const crypt = require("crypto-js");
     const childProcess = require("child_process");
@@ -43,9 +44,12 @@ module.exports = function(RED) {
                 license: license,
                 "node-red": {
                     "nodes": nodes,
-                    dependencies: []
+                    dependencies: [
+                    ]
                 },
-                dependencies: {}
+                dependencies: {
+                    "crypto-js": "^4.0.0"
+                }
             };
             fs.writeFileSync(path.join(dir, "package.json"),
                              JSON.stringify(pkg, null, "\t"));
@@ -53,7 +57,7 @@ module.exports = function(RED) {
         }
         catch (e) {
             console.log(e, e.stack);
-            throw "unexpected subflow JSON format";
+            throw new Error("unexpected subflow JSON format");
         }
     }
 
@@ -73,8 +77,8 @@ ${desc}
     }
 
     function createLicense(dir, license, pkg) {
-        const text = (license ? license : pkg.license);
-        if (license && (license !== "")) {
+        const text = ((license && (license.text !== "")) ? license : pkg.license);
+        if (text && (text !== "")) {
             fs.writeFileSync(path.join(dir, "LICENSE"), text);
         }
     }
@@ -93,13 +97,40 @@ ${desc}
         return data;
     }
 
-    function createJSON(dstPath, sf, key) {
-        if (key) {
-            const flow = sf.flow;
+    function getEncoder(encoding) {
+        var settings = RED.settings;
+        if (settings &&
+            settings.encodeSubflow &&
+            settings.encodeSubflow.methods) {
+            const methods = settings.encodeSubflow.methods;
+            const method = methods.find((x) => (x.name === encoding));
+            if (method) {
+                return method.encode;
+            }
+        }
+        if (encoding === "AES") {
+            // default: AES
+            return function (flow, key) {
+                var data = JSON.stringify(flow);
+                var enc = crypt.AES.encrypt(data, key);
+                return enc.toString();
+            }
+        }
+        throw new Error("encoding not defined:" +encoding);
+    }
+    
+    function createJSON(dstPath, flow, encoding, key) {
+        const sf = flow.shift();
+        if (encoding && (encoding !== "none")) {
+            const encode = getEncoder(encoding);
+            const encStr = encode(flow, key);
             sf.flow = {
-                encoding: "AES",
-                flow: crypt.AES.encrypt(flow, key).toString()
+                encoding: encoding,
+                flow: encStr
             };
+        }
+        else {
+            sf.flow = flow;
         }
         const data = JSON.stringify(sf, null, "\t");
         fs.writeFileSync(dstPath, data);
@@ -110,30 +141,34 @@ ${desc}
         const node = this;
         const name = n.name;
         const base64 = n.base64;
-        console.log("; N", node);
-        const key = n.encrypt ? node.credentials.encryptionKey : null;
+        const encoding = n.encoding;
 
         this.on("input", function(msg) {
             const payload = msg.payload;
-            const dir = fs.mkdtempSync("/tmp/subflow_");
+            const tmpDir = os.tmpdir();
+            const dir = fs.mkdtempSync(path.join(tmpDir, "subflow_"));
             const jsSrc = path.join(__dirname, "template", "subflow.js");
             const jsDst = path.join(dir, "subflow.js");
             const jsonDst = path.join(dir, "subflow.json");
-
-            console.log("; M", msg);
+            const enc = msg.encoding || n.encoding;
+            const key = enc ? (msg.encodeKey || (node.credentials && node.credentials.encodeKey) || null): null;
+            if ((enc !== "none") && (!key || (key === ""))) {
+                node.error("no encoding key");
+                return;
+            }
             try {
                 const pkg = createPackage(dir, payload);
                 createReadme(dir, msg.readme, pkg);
                 createLicense(dir, msg.license, pkg);
-                createJSON(jsonDst, payload, key);
+                createJSON(jsonDst, payload, encoding, key);
                 fs.copyFileSync(jsSrc, jsDst);
                 npmPack(dir);
                 msg.payload = readTgz(dir, pkg, base64);
                 node.send(msg);
             }
             catch (e) {
-                node.error(e);
                 console.log(e, e.stack);
+                node.error(e);
             }
             finally {
                 try {
@@ -142,8 +177,8 @@ ${desc}
                     });
                 }
                 catch (e) {
-                    node.error(e);
                     console.log(e, e.stack);
+                    node.error(e);
                 }
             }
         });
@@ -154,7 +189,20 @@ ${desc}
 
     RED.nodes.registerType("sf to node", Subflow2Node, {
         credentials: {
-            encryptionKey: { type: "password" }
+            encodeKey: { type: "password" }
         }
     });
+
+    RED.httpNode.get("/subflow2node/encodings", (req, res) => {
+        var encs = [];
+        var settings = RED.settings;
+        if (settings &&
+            settings.encodeSubflow &&
+            settings.encodeSubflow.methods) {
+            var methods = settings.encodeSubflow.methods;
+            encs = methods.map((x) => x.name);
+        }
+        res.send(encs);
+    });
+
 };
