@@ -153,7 +153,7 @@ ${desc}
             const enc = msg.encoding || n.encoding;
             const key = enc ? (msg.encodeKey || (node.credentials && node.credentials.encodeKey) || null): null;
             if ((enc !== "none") && (!key || (key === ""))) {
-                node.error("no encoding key");
+                node.error("no encoding key", msg);
                 return;
             }
             try {
@@ -168,7 +168,7 @@ ${desc}
             }
             catch (e) {
                 console.log(e, e.stack);
-                node.error(e);
+                node.error(e, msg);
             }
             finally {
                 try {
@@ -178,7 +178,7 @@ ${desc}
                 }
                 catch (e) {
                     console.log(e, e.stack);
-                    node.error(e);
+                    node.error(e, msg);
                 }
             }
         });
