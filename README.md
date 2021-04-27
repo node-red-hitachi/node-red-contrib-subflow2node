@@ -18,11 +18,13 @@ npm install node-red-contrib-subflow2node
 
 Since package generation with tools and/or Node-RED editor are being considered by core Node-RED project, this node is intended as a substitution until then.
 
-The subflow2node node inputs the exported SUBFLOW JSON format data and outputs the npm package.　A subflow module can be added to the palette by saving this package to a file and uploading it from the manage palette menu in the Node-RED editor.
+The subflow2node node accepts the exported SUBFLOW JSON format data and outputs the npm package.　A subflow module can be added to the palette by saving this package to a file and uploading it from the manage palette menu in the Node-RED editor.
 
-This node provides experimental support of flow encoding discussed [here](https://github.com/node-red/designs/pull/26).  Decoding key for flow should be defined by OS environment variable `NR_FLOW_DECODE_KEY`.
+This node provides experimental support of flow encoding feature discussed [here](https://github.com/node-red/designs/pull/26).  Decoding key for flow should be defined by OS environment variable `NR_FLOW_DECODE_KEY`.
 
 ***Note:*** A npm module created by this node uses APIs that require at least Node-RED 1.3.
+
+***Note:*** This node expects subflow definition exported from subflow template.  Also, generated NPM package may not work for sufblow definitions with nested subflow.
 
 Example
 -------
@@ -33,10 +35,16 @@ Import example from `Inport/Examples/node-red-contrib-subflow2node`.
   
   This example use a `template` node to define subflow json data and a `file` node to write package.  
 
+  ![Example Flow #1](FIGS/Sample1.png)
+  
 - *02 - simple Web UI*
   
   This example flow creates a HTTP end-point at http://localhost:1880/subflow2node that provides a simple UI for subflow module generation.   In this US, write subflow JSON data, readme in Markdown, and licence text.  Pressing send button moves to package download page.
 
+  ![Example Flow #2](FIGS/Sample2.png)
+  
+  ![Simple Web UI](FIGS/WebUI.png)
+  
   Example Sublow Definition:
 
 ```json

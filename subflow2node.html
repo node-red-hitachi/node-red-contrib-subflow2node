@@ -16,20 +16,21 @@
 
 <script type="text/html" data-template-name="sf to node">
     <div class="form-row">
-        <label for="node-input-name">Name</label>
+        <label for="node-input-name" data-i18n="node-red:common.label.name"></label>
         <input type="text" id="node-input-name"/>
     </div>
     <div class="form-row" style="margin-left: 40px; width: 100%;">
         <input type="checkbox" id="node-input-base64" style="width: auto; vertical-align: top; display: inline-block">
-        <label for="node-input-base64" style="width: 70%;">Output base64 encoded NPM package</label>
+        <label for="node-input-base64" style="width: 70%;"
+        data-i18n="sf to node.label.base64"></label>
     </div>
     <div class="form-row">
-        <label>Encoding</label>
+        <label data-i18n="sf to node.label.encoding"></label>
         <select id="node-input-encoding">
         </select>
     </div>
     <div class="form-row" id="encode-div">
-        <label>Encode Key</label>
+        <label data-i18n="sf to node.label.encodeKey"></label>
         <input type="password" id="node-input-encodeKey">
     </div>
 </script>

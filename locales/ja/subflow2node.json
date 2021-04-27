@@ -1,0 +1,9 @@
+{
+    "sf to node": {
+        "label": {
+            "base64": "Base64形式でNPMパッケージをエンコード",
+            "encoding": "エンコード",
+            "encodeKey": "エンコードキー"
+        }
+    }
+}

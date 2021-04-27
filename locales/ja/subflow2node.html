@@ -1,0 +1,33 @@
+<!--
+  Copyright JS Foundation and other contributors, http://js.foundation
+
+  Licensed under the Apache License, Version 2.0 (the "License");
+  you may not use this file except in compliance with the License.
+  You may obtain a copy of the License at
+
+  http://www.apache.org/licenses/LICENSE-2.0
+
+  Unless required by applicable law or agreed to in writing, software
+  distributed under the License is distributed on an "AS IS" BASIS,
+  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+  See the License for the specific language governing permissions and
+  limitations under the License.
+-->
+
+<script type="text/html" data-help-name="sf to node">
+    <p>サブフロー定義をインストール可能なNPMモジュールに変換する</p>
+    <h3>入力</h3>
+    <dl class="message-properties">
+        <dt>payload <span class="property-type">object</span></dt>
+        <dd>サブフロー定義のJavaScriptオブジェクト</dd>
+    </dl>
+    <h3>Outputs</h3>
+    <dl class="message-properties">
+        <dt>payload <span class="property-type">object</span></dt>
+        <dd>入力サブフロー定義から生成したインストール可能なNPMパッケージ</dd>
+    </dl>
+    <h3>詳細</h3>
+    <p>デフォルトでは、サブフロー定義を入力し、インストール可能なNPMパッケージを出力します。「Base64形式でNPMパッケージをエンコード」をチェックすると、出力をbase64形式の文字列に変換します。</p>
+    <p>このノードは出力されるサブフロー定義のエンコードする機能を備えています。デフォルトでは、AESエンコーディングをサポートします。AESエンコードされたNPMパッケージをインストールする場合、デコードキーをOS環境変数<code>NR_FLOW_DECODE_KEY</code>に設定します。</p>
+    <p>注: このノードは、サブフローテンプレートからエクスポートされたサブフロー定義を入力とします。また、サブフロー内でサブフローを利用している場合は動作しない可能性があります。</p>
+</script>

@@ -1,0 +1,9 @@
+{
+    "sf to node": {
+        "label": {
+            "base64": "Output base64 encoded NPM package",
+            "encoding": "Encoding",
+            "encodeKey": "Encode Key"
+        }
+    }
+}
