@@ -25,14 +25,20 @@ module.exports = function(RED) {
 
     function createPackage(dir, json) {
         try {
-            const sf = json[0];
+            const [sf, newFlow] = getSubflowDef(json);
             const meta = sf.meta;
+            if (!meta) {
+                throw new Error("no metadata");
+            }
             const module = meta.module;
             const type = meta.type;
-            const version = meta.version;
-            const author = meta.author;
-            const desc = meta.desc;
-            const keywords = meta.keywords.split(/ *, */).filter(x => (x !== ""));
+            if (!module || !type) {
+                throw new Error("no module info");
+            }
+            const version = (meta.version || "");
+            const author = (meta.author || "");
+            const desc = (meta.desc || "");
+            const keywords = (meta.keywords || "").split(/ *, */).filter(x => (x !== ""));
             const license = meta.license;
             const nodes = {};
             nodes[type] = "subflow.js";
@@ -118,19 +124,36 @@ ${desc}
         }
         throw new Error("encoding not defined:" +encoding);
     }
+
+    function getSubflowDef(flow) {
+        const newFlow = [];
+        let sf = null;
+        flow.forEach((item) => {
+            if (item.hasOwnProperty("meta")) {
+                if (sf !== null) {
+                    throw new Error("unexpected subflow definition");
+                }
+                sf = item;
+            }
+            else {
+                newFlow.push(item);
+            }
+        });
+        return [sf, newFlow];
+    }
     
     function createJSON(dstPath, flow, encoding, key) {
-        const sf = flow.shift();
+        const [sf, newFlow] = getSubflowDef(flow);
         if (encoding && (encoding !== "none")) {
             const encode = getEncoder(encoding);
-            const encStr = encode(flow, key);
+            const encStr = encode(newFlow, key);
             sf.flow = {
                 encoding: encoding,
                 flow: encStr
             };
         }
         else {
-            sf.flow = flow;
+            sf.flow = newFlow;
         }
         const data = JSON.stringify(sf, null, "\t");
         fs.writeFileSync(dstPath, data);
