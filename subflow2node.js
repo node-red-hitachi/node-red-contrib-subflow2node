@@ -129,7 +129,8 @@ ${desc}
         const newFlow = [];
         let sf = null;
         flow.forEach((item) => {
-            if (item.hasOwnProperty("meta")) {
+            if (item.hasOwnProperty("meta") &&
+                item.meta.hasOwnProperty("module")) {
                 if (sf !== null) {
                     throw new Error("unexpected subflow definition");
                 }
